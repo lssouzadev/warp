@@ -80,10 +80,7 @@ pub fn open_url_in_system(url: &str) {
         //    "native" opening of files is not necessarily going to work.
         // We choose to do the following:
         // 1. First attempt to open with `wslview`, since that is basically made to open stuff in wsl
-        // 2. Use `cmd.exe /c start {url}` to open in the user's default windows browser
-        //    - If a user does not want this behavior, and wants all opening to go through
-        //      WSL, they can set the env variable WARP_FORCE_WSL_BROWSER.
-        // 3. Fall back to default linux url opening behavior.
+        // 2. Fall back to default linux url opening behavior.
         if platform::linux::is_wsl() {
             match open::with_detached(url, "wslview") {
                 Ok(_) => return,
@@ -91,26 +88,6 @@ pub fn open_url_in_system(url: &str) {
                     "Failed to open url with wslview {e:?}, falling back to another method"
                 ),
             };
-
-            // Attempt to open by
-            if !use_wsl_browser() {
-                let mut cmd = command::blocking::Command::new("cmd.exe");
-                cmd.args(["/c", "start", url]);
-
-                // Note: Ideally, we would be calling detached like open::that_detached does.
-                // However, it is probably fine.
-                match cmd
-                    .stdin(std::process::Stdio::null())
-                    .stdout(std::process::Stdio::null())
-                    .stderr(std::process::Stdio::null())
-                    .status()
-                {
-                    Ok(_) => return,
-                    Err(e) => log::info!(
-                        "Failed to open url with cmd.exe {e:?}, falling back to another method"
-                    ),
-                }
-            }
         }
         if let Err(e) = open::that_detached(url) {
             log::warn!("Unable to open url {e:?}");
@@ -123,14 +100,6 @@ pub fn open_url_in_system(url: &str) {
             log::warn!("Unable to open url {e:?}");
         }
     }
-}
-
-#[cfg(any(target_os = "linux", target_os = "freebsd"))]
-fn use_wsl_browser() -> bool {
-    static USE_WSL_BROWSER: OnceLock<bool> = OnceLock::new();
-    USE_WSL_BROWSER
-        .get_or_init(|| std::env::var("WARP_FORCE_WSL_BROWSER").is_ok())
-        .to_owned()
 }
 
 /// Marks the current thread as the application's main thread.
