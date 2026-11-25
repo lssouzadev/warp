@@ -549,5 +549,17 @@ fn enabled_features() -> HashSet<FeatureFlag> {
         FeatureFlag::AcpHarness,
     ]);
 
+    // Keep local agent sessions and terminal input features intact; these integrations
+    // are unrelated to hosting CLI agents.
+    for flag in [
+        FeatureFlag::GlobalAIAnalyticsCollection,
+        FeatureFlag::RecordAppActiveEvents,
+        FeatureFlag::FigmaDetection,
+        FeatureFlag::GetStartedTab,
+        FeatureFlag::AutoOpenCodeReviewPane,
+    ] {
+        flags.remove(&flag);
+    }
+
     flags
 }
