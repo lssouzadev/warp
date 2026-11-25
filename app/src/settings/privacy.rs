@@ -86,7 +86,7 @@ impl settings_value::SettingsValue for CustomSecretRegex {}
 define_settings_group!(WarpDrivePrivacySettings, settings: [
     is_telemetry_enabled: IsTelemetryEnabled {
         type: bool,
-        default: true,
+        default: false,
         supported_platforms: SupportedPlatforms::ALL,
         sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::No),
         surface: settings::SettingSurfaces::ALL,

@@ -643,7 +643,10 @@ impl LaunchMode {
             LaunchMode::RemoteServerDaemon { .. } => {
                 FeatureFlag::RemoteCodebaseIndexing.is_enabled()
             }
-            LaunchMode::App { .. } | LaunchMode::Test { .. } => true,
+            // External CLI agents manage their own codebase context. Avoid restoring or
+            // building duplicate indices in the desktop terminal host.
+            LaunchMode::App { .. } => false,
+            LaunchMode::Test { .. } => true,
             LaunchMode::RemoteServerProxy => false,
             // Codebase indexing stays off for the TUI until it has deferred
             // persisted-index restore and multi-process-safe snapshot writes
